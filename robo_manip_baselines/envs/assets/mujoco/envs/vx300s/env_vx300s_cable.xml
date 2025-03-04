@@ -1,0 +1,47 @@
+<mujoco model="vx300s_cable">
+  <include file="./env_vx300s_common.xml"/>
+
+  <include file="../../robots/vx300s/vx300s_arms_config.xml"/>
+
+  <include file="../../objects/aloha/aloha_table_config.xml"/>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true" diffuse="0.5 0.5 0.5"/>
+
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" pos="0 0 -0.75"/>
+    <site name="worldref" pos="0 0 -0.75"/>
+
+    <body euler="0 0 -1.5708">
+      <include file="../../robots/vx300s/vx300s_arms_body.xml"/>
+    </body>
+
+    <body euler="0 0 -1.5708">
+      <include file="../../objects/aloha/aloha_table_body.xml"/>
+    </body>
+
+    <body name="cable" pos="-0.175 0.25 0.015" quat="0.707105 0 0 -0.707108">
+      <freejoint/>
+      <include file="../../objects/cable.xml"/>
+    </body>
+
+    <body name="cable_end" pos="-0.175 -0.23 0.015" euler="0 0 -1.5708">
+      <freejoint/>
+      <geom type="box" size="0.02 0.015 0.015" pos="0.0 0.0 0.0" rgba="0.1 0.8 0.1 1.0"/>
+    </body>
+
+    <body name="poles" pos="0.04 0.0 0.0">
+      <geom name="pole1" type="cylinder" size="0.01 0.03" pos="-0.12 0.15 0.03" rgba="0.8 0.1 0.5 1.0"/>
+      <geom name="pole2" type="cylinder" size="0.01 0.03" pos="0.12 0.15 0.03" rgba="0.1 0.5 0.8 1.0"/>
+    </body>
+  </worldbody>
+
+  <equality>
+    <weld name="cable_end" body1="B24" body2="cable_end" relpose="0 0 0 1 0 0 0"/>
+  </equality>
+
+  <contact>
+    <exclude body1="B0" body2="B1"/>
+    <exclude body1="B23" body2="cable_end"/>
+    <exclude body1="B24" body2="cable_end"/>
+  </contact>
+</mujoco>

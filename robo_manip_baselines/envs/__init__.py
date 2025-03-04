@@ -40,6 +40,12 @@ register(
     entry_point="robo_manip_baselines.envs.mujoco:MujocoAlohaCableEnv",
 )
 
+## ViperX300s
+register(
+    id="robo_manip_baselines/MujocoVx300sCableEnv-v0",
+    entry_point="robo_manip_baselines.envs.mujoco:MujocoVx300sCableEnv",
+)
+
 # Isaac
 register(
     id="robo_manip_baselines/IsaacUR5eChainEnv-v0",
