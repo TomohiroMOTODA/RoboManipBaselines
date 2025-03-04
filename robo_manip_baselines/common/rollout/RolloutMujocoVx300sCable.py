@@ -14,5 +14,12 @@ class RolloutMujocoVx300sCable(RolloutBase):
     def set_arm_command(self):
         if self.data_manager.status in (MotionStatus.PRE_REACH, MotionStatus.REACH):
             pass
+        elif self.data_manager.status == MotionStatus.TELEOP:
+            action = self.pred_action[self.env.unwrapped.arm_action_idxes]    
+            self.motion_manager.target_se3 = pin.SE3(
+                pin.rpy.rpyToMatrix(action[3],action[4],action[5]), np.array(action[:3])
+            )
+            self.motion_manager.inverse_kinematics()
         else:
             super().set_arm_command()
+
