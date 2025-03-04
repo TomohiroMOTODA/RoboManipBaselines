@@ -15,10 +15,10 @@ class MujocoVx300sEnvBase(MujocoEnvBase):
     }
     observation_space = Dict(
         {
-            "right/joint_pos": Box(
+            "left/joint_pos": Box(
                 low=-np.inf, high=np.inf, shape=(7,), dtype=np.float64
             ),
-            "right/joint_vel": Box(
+            "left/joint_vel": Box(
                 low=-np.inf, high=np.inf, shape=(7,), dtype=np.float64
             ),
         }
@@ -29,7 +29,7 @@ class MujocoVx300sEnvBase(MujocoEnvBase):
         self.arm_urdf_path = path.join(
             path.dirname(__file__), "../../assets/common/robots/aloha/vx300s.urdf"
         )
-        self.arm_root_pose = self.get_body_pose("right/base_link")
+        self.arm_root_pose = self.get_body_pose("left/base_link")
         self.ik_eef_joint_id = 6
         self.ik_arm_joint_ids = slice(0, 6)
         self.init_qpos[0 : len(init_qpos)] = init_qpos
@@ -44,8 +44,8 @@ class MujocoVx300sEnvBase(MujocoEnvBase):
 
     def _get_obs(self):
         obs = {
-            "right/joint_pos": np.zeros(7),
-            "right/joint_vel": np.zeros(7),
+            "left/joint_pos": np.zeros(7),
+            "left/joint_vel": np.zeros(7),
         }
 
         single_arm_joint_name_list = [
@@ -61,7 +61,7 @@ class MujocoVx300sEnvBase(MujocoEnvBase):
             "left_finger",
         ]
 
-        for arm_idx, arm_name in enumerate([("right")]):
+        for arm_idx, arm_name in enumerate([("left")]):
             joint_pos_key = f"{arm_name}/joint_pos"
             joint_vel_key = f"{arm_name}/joint_vel"
 
@@ -84,16 +84,16 @@ class MujocoVx300sEnvBase(MujocoEnvBase):
     def get_joint_pos_from_obs(self, obs, exclude_gripper=False):
         """Get joint position from observation."""
         if exclude_gripper:
-            return obs["right/joint_pos"][self.arm_action_idxes]
+            return obs["left/joint_pos"][self.arm_action_idxes]
         else:
-            return obs["right/joint_pos"]
+            return obs["left/joint_pos"]
 
     def get_joint_vel_from_obs(self, obs, exclude_gripper=False):
-        """Get joint velocity from ob   servation."""
+        """Get joint velocity from observation."""
         if exclude_gripper:
-            return obs["right/joint_vel"][self.arm_action_idxes]
+            return obs["left/joint_vel"][self.arm_action_idxes]
         else:
-            return obs["right/joint_vel"]
+            return obs["left/joint_vel"]
 
     def get_eef_wrench_from_obs(self, obs):
         """Get end-effector wrench (fx, fy, fz, nx, ny, nz) from observation."""
