@@ -15,6 +15,9 @@ from .RolloutMujocoXarm7Ring import RolloutMujocoXarm7Ring
 ## Aloha
 from .RolloutMujocoAlohaCable import RolloutMujocoAlohaCable
 
+## ViperX
+from .RolloutMujocoVx300sCable import RolloutMujocoVx300sCable
+
 # Isaac
 from .RolloutIsaacUR5eChain import RolloutIsaacUR5eChain
 from .RolloutIsaacUR5eCabinet import RolloutIsaacUR5eCabinet
