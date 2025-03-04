@@ -22,3 +22,6 @@
 	path = third_party/gello_software
 	url = https://github.com/wuphilipp/gello_software.git
 	ignore = untracked
+[submodule "third_party/ACT"]
+	path = third_party/ACT
+	url = git@github.com:TomohiroMOTODA/ACT.git
