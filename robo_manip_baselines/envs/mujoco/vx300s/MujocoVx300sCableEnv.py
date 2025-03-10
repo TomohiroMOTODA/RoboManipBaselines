@@ -19,7 +19,7 @@ class MujocoVx300sCableEnv(MujocoVx300sEnvBase):
             **kwargs,
         )
 
-        self.original_pole_pos = self.model.geom("pole1").pos.copy()
+        # self.original_pole_pos = self.model.geom("pole1").pos.copy()
         self.pole_pos_offsets = np.array(
             [
                 [0.0, 0.0, 0.0],
@@ -32,11 +32,12 @@ class MujocoVx300sCableEnv(MujocoVx300sEnvBase):
         )  # [m]
 
     def modify_world(self, world_idx=None, cumulative_idx=None):
-        if world_idx is None:
-            world_idx = cumulative_idx % len(self.pole_pos_offsets)
-        self.model.geom("pole1").pos = (
-            self.original_pole_pos + self.pole_pos_offsets[world_idx]
-        )
-        self.model.geom("pole2").pos = self.model.geom("pole1").pos
-        self.model.geom("pole2").pos[0] *= -1
-        return world_idx
+        pass
+        # if world_idx is None:
+        #     world_idx = cumulative_idx % len(self.pole_pos_offsets)
+        # self.model.geom("pole1").pos = (
+        #     self.original_pole_pos + self.pole_pos_offsets[world_idx]
+        # )
+        # self.model.geom("pole2").pos = self.model.geom("pole1").pos
+        # self.model.geom("pole2").pos[0] *= -1
+        # return world_idx
