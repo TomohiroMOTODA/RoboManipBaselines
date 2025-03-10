@@ -1,9 +1,28 @@
+<!--
+YCB Objects:: Ubder Apache License, Version 2.0
+We took them from <https://github.com/vikashplus/ycb_sim>, by Vikash Kumar (vikashplus@gmail.com)
+
+-->
+
 <mujoco model="vx300s_cable">
+
   <include file="./env_vx300s_common.xml"/>
 
   <include file="../../robots/vx300s/vx300s_arms_config.xml"/>
-
   <include file="../../objects/aloha/aloha_table_config.xml"/>
+
+  <!-- YCB assets and defaults -->
+  <include file="../../objects/ycb/includes/defaults_ycb.xml"/>
+  <include file="../../objects/ycb/includes/assets_035_power_drill.xml"/>
+  <include file="../../objects/ycb/includes/assets_010_potted_meat_can.xml"/>
+  <include file="../../objects/ycb/includes/assets_009_gelatin_box.xml"/>
+  <include file="../../objects/ycb/includes/assets_008_pudding_box.xml"/>
+  <include file="../../objects/ycb/includes/assets_007_tuna_fish_can.xml"/>
+  <include file="../../objects/ycb/includes/assets_006_mustard_bottle.xml"/>
+  <include file="../../objects/ycb/includes/assets_005_tomato_soup_can.xml"/>
+  <include file="../../objects/ycb/includes/assets_004_sugar_box.xml"/>
+  <include file="../../objects/ycb/includes/assets_003_cracker_box.xml"/>
+  <include file="../../objects/ycb/includes/assets_002_master_chef_can.xml"/>
 
   <worldbody>
     <light pos="0 0 1.5" dir="0 0 -1" directional="true" diffuse="0.5 0.5 0.5"/>
@@ -19,32 +38,57 @@
       <include file="../../objects/aloha/aloha_table_body.xml"/>
     </body>
 
-    <!-- <body name="cable" pos="-0.175 0.25 0.015" quat="0.707105 0 0 -0.707108">
-      <freejoint/>
-      <include file="../../objects/cable.xml"/>
-    </body> -->
+    <!-- Place the YCB Object -->
+        <body pos="-0.12 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_035_power_drill.xml"/>
+            <freejoint/>
+        </body>
 
-    <!-- <body name="cable_end" pos="-0.175 -0.23 0.015" euler="0 0 -1.5708">
-      <freejoint/>
-      <geom type="box" size="0.02 0.015 0.015" pos="0.0 0.0 0.0" rgba="0.1 0.8 0.1 1.0"/>
-    </body> -->
+        <body pos="-0.02 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_010_potted_meat_can.xml"/>
+            <freejoint/>
+        </body>
 
-    <!-- <body name="poles" pos="0.04 0.0 0.0">
-      <geom name="pole1" type="cylinder" size="0.01 0.03" pos="-0.12 0.15 0.03" rgba="0.8 0.1 0.5 1.0"/>
-      <geom name="pole2" type="cylinder" size="0.01 0.03" pos="0.12 0.15 0.03" rgba="0.1 0.5 0.8 1.0"/>
-    </body> -->
+        <body pos="0.08 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_009_gelatin_box.xml"/>
+            <freejoint/>
+        </body>
+
+         <body pos="0.18 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_008_pudding_box.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.28 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_007_tuna_fish_can.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.38 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_006_mustard_bottle.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.48 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_005_tomato_soup_can.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.58 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_004_sugar_box.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.68 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_003_cracker_box.xml"/>
+            <freejoint/>
+        </body>
+
+        <body pos="0.78 0.15 0.03">
+            <include file="../../objects/ycb/includes/body_002_master_chef_can.xml"/>
+            <freejoint/>
+        </body>
+
+
   </worldbody>
-
-  <!-- <equality>
-    <weld name="cable_end" body1="B0" body2="cable_end" relpose="0 0 0 1 0 0 0"/>
-  </equality> -->
-
-  <!-- 
-  <contact>
-    <exclude body1="B0" body2="B1"/>
-    <exclude body1="B23" body2="cable_end"/>
-    <exclude body1="B24" body2="cable_end"/>
-
-  </contact>
-  -->
 </mujoco>
