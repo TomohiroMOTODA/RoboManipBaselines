@@ -97,14 +97,16 @@ class RolloutHoge(RolloutBase):
         for action_idx, _all_actions in enumerate(reversed(self.all_actions_history)):
             action += exp_weights[::-1][action_idx] * _all_actions[action_idx]
         self.pred_action = action * self.stats["action_std"] + self.stats["action_mean"]
+
         self.pred_action_list = np.concatenate(
             [self.pred_action_list, np.expand_dims(self.pred_action, 0)]
         )
 
+
         return True
 
     def draw_plot(self):
-        return
+        pass
         # if self.auto_time_idx % self.skip_draw != 0:
         #     return
 

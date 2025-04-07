@@ -39,7 +39,11 @@ We took them from <https://github.com/vikashplus/ycb_sim>, by Vikash Kumar (vika
     </body>
 
     <!-- Place the YCB Object -->
-        <body pos="-0.12 0.15 0.03">
+        <body pos="0.01 0.0 0.03" euler="1.5 -1.57 -1.5">
+            <include file="../../objects/ycb/includes/body_009_gelatin_box.xml"/>
+            <freejoint/>
+        </body>
+        <!-- <body pos="-0.12 0.15 0.03">
             <include file="../../objects/ycb/includes/body_035_power_drill.xml"/>
             <freejoint/>
         </body>
@@ -87,7 +91,7 @@ We took them from <https://github.com/vikashplus/ycb_sim>, by Vikash Kumar (vika
         <body pos="0.78 0.15 0.03">
             <include file="../../objects/ycb/includes/body_002_master_chef_can.xml"/>
             <freejoint/>
-        </body>
+        </body> -->
 
 
   </worldbody>
