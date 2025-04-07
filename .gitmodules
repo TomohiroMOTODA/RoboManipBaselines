@@ -18,3 +18,10 @@
 	path = third_party/gello_software
 	url = https://github.com/mmurooka/gello_software.git
 	ignore = untracked
+
+# This repository is under private license.
+# Please do not share this repository without permission at current time.
+[submodule "third_party/act-cross-fdsl"]
+	path = third_party/act-cross-fdsl
+	url = git@github.com:TomohiroMOTODA/act-cross-fdsl.git
+	ignore = untracked
