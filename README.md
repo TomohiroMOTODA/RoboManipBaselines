@@ -1,3 +1,5 @@
+**The code in this repository is currently under development in [the v2.0.0-dev branch](https://github.com/isri-aist/RoboManipBaselines/tree/v2.0.0-dev). Developers are recommended to work on the v2.0.0-dev branch as a base.**
+
 # [RoboManipBaselines](https://isri-aist.github.io/RoboManipBaselines-ProjectPage)
 Software that integrates various imitation learning methods and benchmark task environments to provide baselines for robot manipulation
 
