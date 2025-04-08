@@ -12,7 +12,7 @@ from training.policy import ACTPolicy
 from robo_manip_baselines.common import RolloutBase, denormalize_data
 
 
-class RolloutActFDSL(RolloutBase):
+class RolloutActCrossFDSL(RolloutBase):
     def setup_policy(self):
         # Print policy information
         self.print_policy_info()
