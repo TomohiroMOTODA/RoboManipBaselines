@@ -142,9 +142,9 @@ class TrainActCrossFDSL(TrainBase):
             "std": self.norm_stats["action_std"],
             "example": all_action_data[0],
         }
+        self.model_meta_info["action"].update(data_stats_action)
 
         ## TBD
-        # self.model_meta_info["action"].update(data_stats_action)
         # self.model_meta_info["image"].update(
         #     {
         #         "rgb_example": rgb_image_example,
