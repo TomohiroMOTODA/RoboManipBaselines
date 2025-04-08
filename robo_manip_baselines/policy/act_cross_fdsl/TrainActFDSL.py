@@ -4,17 +4,17 @@ import sys
 import torch
 from tqdm import tqdm
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act-cross-fdsl"))
 from detr.models.detr_vae import DETRVAE
-from policy import ACTPolicy
+from training.policy import ACTPolicy
+from training.utils import load_data
 
 from robo_manip_baselines.common import TrainBase
 
 from .ActDataset import ActDataset
 
-
-class TrainAct(TrainBase):
-    DatasetClass = ActDataset
+class TrainActFDSL(TrainBase):
+    DatasetClass = ActDataset # TODO hardcoded for now
 
     def set_additional_args(self, parser):
         parser.set_defaults(enable_rmb_cache=True)
@@ -34,6 +34,10 @@ class TrainAct(TrainBase):
         )
         parser.add_argument(
             "--dim_feedforward", type=int, default=3200, help="feedforward dimension"
+        )
+
+        parser.add_argument(
+            "--dataset_dir", type=str, default="./data", help="dataset directory"
         )
 
     def setup_model_meta_info(self):
@@ -69,6 +73,18 @@ class TrainAct(TrainBase):
         # Print policy information
         self.print_policy_info()
         print(f"  - chunk size: {self.args.chunk_size}")
+
+
+        data_dir = os.path.join(self.args.dataset_dir)
+        num_episodes = len(os.listdir(data_dir))
+        self.setup_dataloader(data_dir, num_episodes, self.args.camera_names,
+                            self.args.batch_size, self.args.batch_size, data_type="no_pc")
+
+    
+    def setup_dataloader(self, dataset_dir, num_episodes, camera_names, batch_size_train, batch_size_val, data_type="no_pc"):
+        # Construct dataloader
+        self.train_dataloader, self.val_dataloader, norm_stats, is_sim = load_data(dataset_dir, num_episodes, camera_names, batch_size_train, batch_size_val, data_type=data_type)
+        
 
     def train_loop(self):
         for epoch in tqdm(range(self.args.num_epochs)):

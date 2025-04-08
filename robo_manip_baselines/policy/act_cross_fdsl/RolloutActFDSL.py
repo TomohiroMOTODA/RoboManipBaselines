@@ -5,14 +5,14 @@ import cv2
 import matplotlib.pylab as plt
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act-cross-fdsl"))
 from detr.models.detr_vae import DETRVAE
-from policy import ACTPolicy
+from training.policy import ACTPolicy
 
 from robo_manip_baselines.common import RolloutBase, denormalize_data
 
 
-class RolloutAct(RolloutBase):
+class RolloutActFDSL(RolloutBase):
     def setup_policy(self):
         # Print policy information
         self.print_policy_info()
