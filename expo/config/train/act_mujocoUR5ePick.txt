@@ -1,0 +1,16 @@
+# ACT Policy Training Configuration for MujocoUR5ePick
+# YCB Object Picking Tasks (cracker_box, pudding_box, potted_meat_can)
+
+--num_epochs 1000
+--batch_size 32
+--lr 1e-4
+--chunk_size 100
+--kl_weight 10
+--hidden_dim 512
+--dim_feedforward 3200
+--camera_names front hand
+--state_keys measured_joint_pos
+--action_keys command_joint_pos
+--save_freq 100
+--early_stop_patience 50
+--weight_decay 1e-4

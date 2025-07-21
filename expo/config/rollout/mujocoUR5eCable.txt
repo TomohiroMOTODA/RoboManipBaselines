@@ -1,0 +1,10 @@
+# Rollout Configuration for MujocoUR5eCable  
+# Cable Manipulation Tasks
+
+--auto_exit
+--no_render
+--no_plot
+--max_duration 45.0
+--world_idx_list 0 1 2 3 4
+--save_failure_cases
+--success_threshold 1.0

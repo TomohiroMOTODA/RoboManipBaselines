@@ -1,0 +1,107 @@
+# Experiment Configuration for UR5 YCB Object Manipulation
+# This file defines the experimental setup for automated testing of
+# imitation learning policies on UR5 simulation environments
+
+# Policies to test
+policies:
+  - "Act"                    # Action Chunking Transformer
+  - "Mlp"                    # Multi-layer Perceptron
+  - "Sarnn"                  # Spatial Attention RNN
+  - "DiffusionPolicy"        # Diffusion-based behavior cloning
+
+# UR5 simulation environments with YCB object tasks
+environments:
+  MujocoUR5ePick:
+    dataset_location: "./datasets/MujocoUR5ePick"
+    world_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    success_threshold: 1.0
+    task_type: "pick"
+    description: "YCB object picking tasks"
+    ycb_objects:
+      - "cracker_box"
+      - "pudding_box" 
+      - "potted_meat_can"
+    max_duration: 30.0
+    
+  MujocoUR5eCable:
+    dataset_location: "./datasets/MujocoUR5eCable"
+    world_indices: [0, 1, 2, 3, 4]
+    success_threshold: 1.0
+    task_type: "manipulation"
+    description: "Cable manipulation and positioning"
+    max_duration: 45.0
+    
+  MujocoUR5eCabinet:
+    dataset_location: "./datasets/MujocoUR5eCabinet"
+    world_indices: [0, 1, 2, 3, 4, 5]
+    success_threshold: 1.0
+    task_type: "push"
+    description: "Cabinet door opening (push-based manipulation)"
+    max_duration: 30.0
+    
+  MujocoUR5eDoor:
+    dataset_location: "./datasets/MujocoUR5eDoor"
+    world_indices: [0, 1, 2, 3]
+    success_threshold: 1.0
+    task_type: "push"
+    description: "Door opening tasks"
+    max_duration: 35.0
+
+# Output configuration
+output:
+  results_dir: "./results"
+  generate_plots: true
+  save_videos: false
+  markdown_report: true
+  detailed_analysis: true
+
+# Experiment settings
+experiment_settings:
+  seed: 42
+  retry_on_failure: true
+  max_retries: 2
+  timeout_minutes: 120
+  parallel_execution: false
+  
+# Success criteria definitions
+success_criteria:
+  pick_tasks:
+    reward_threshold: 1.0
+    description: "Object successfully lifted and held"
+    
+  push_tasks:
+    reward_threshold: 1.0
+    description: "Object/door moved to target position"
+    
+  place_tasks:
+    reward_threshold: 1.0
+    description: "Object placed in target location"
+
+# YCB object specifications
+ycb_objects:
+  cracker_box:
+    size: [0.16, 0.21, 0.07]  # meters
+    weight: 0.411  # kg
+    
+  pudding_box:
+    size: [0.095, 0.095, 0.11]
+    weight: 0.187
+    
+  potted_meat_can:
+    size: [0.102, 0.084, 0.054]
+    weight: 0.370
+
+# Task-specific parameters
+task_parameters:
+  pick:
+    approach_distance: 0.05  # meters above object
+    grasp_force: 50.0       # N
+    lift_height: 0.15       # meters
+    
+  push:
+    contact_force: 20.0     # N
+    push_distance: 0.10     # meters
+    
+  place:
+    place_height: 0.02      # meters above surface
+    place_precision: 0.01   # meters tolerance

@@ -1,0 +1,13 @@
+# MLP Policy Training Configuration for MujocoUR5ePick
+# YCB Object Picking Tasks
+
+--num_epochs 500
+--batch_size 64
+--lr 5e-4
+--hidden_dim 256
+--num_layers 4
+--camera_names front hand
+--state_keys measured_joint_pos
+--action_keys command_joint_pos
+--dropout 0.1
+--save_freq 50
