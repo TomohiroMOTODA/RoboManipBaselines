@@ -1,3 +1,18 @@
+<p align="center">
+  <a href="https://isri-aist.github.io/RoboManipBaselines-ProjectPage">
+    <img src="https://github.com/user-attachments/assets/76636cfe-9abe-4b6f-b867-1afbd1669120" alt="logo" width="300">
+  </a>
+  <br/>
+  <a href="https://github.com/isri-aist/RoboManipBaselines/actions/workflows/install.yml">
+    <img src="https://github.com/isri-aist/RoboManipBaselines/actions/workflows/install.yml/badge.svg" alt="CI-install">
+  </a>
+  <a href="https://github.com/isri-aist/RoboManipBaselines/actions/workflows/pre-commit.yml">
+    <img src="https://github.com/isri-aist/RoboManipBaselines/actions/workflows/pre-commit.yml/badge.svg" alt="CI-pre-commit">
+  </a>
+  <a href="https://github.com/isri-aist/RoboManipBaselines/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/isri-aist/RoboManipBaselines" alt="LICENSE">
+  </a>
+</p>
 
 ---
 
@@ -5,10 +20,6 @@
 
 A software framework integrating various **imitation learning methods** and **benchmark environments** for robotic manipulation.  
 Provides easy-to-use **baselines** for policy training, evaluation, and deployment.
-
-[![CI-install](https://github.com/isri-aist/RoboManipBaselines/actions/workflows/install.yml/badge.svg)](https://github.com/isri-aist/RoboManipBaselines/actions/workflows/install.yml)
-[![CI-pre-commit](https://github.com/isri-aist/RoboManipBaselines/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/isri-aist/RoboManipBaselines/actions/workflows/pre-commit.yml)
-[![LICENSE](https://img.shields.io/github/license/isri-aist/RoboManipBaselines)](https://github.com/isri-aist/RoboManipBaselines/blob/master/LICENSE)
 
 https://github.com/user-attachments/assets/c37c9956-2d50-488d-83ae-9c11c3900992
 
@@ -33,18 +44,18 @@ Follow our step-by-step [Installation Guide](./doc/install.md) to get set up smo
 
 We provide several powerful policy architectures for manipulation tasks:
 
-- 🔹 **[MLP](./robo_manip_baselines/policy/mlp)** – Simple feedforward policy  
-- 🔹 **[SARNN](./robo_manip_baselines/policy/sarnn)** – Sequence-aware RNN-based policy  
-- 🔹 **[ACT](./robo_manip_baselines/policy/act)** – Transformer-based imitation policy  
-- 🔹 **[MT-ACT](./robo_manip_baselines/policy/mt_act)** – Multi-task Transformer-based imitation policy  
-- 🔹 **[Diffusion Policy](./robo_manip_baselines/policy/diffusion_policy)** – Diffusion-based behavior cloning policy  
-- 🔹 **[3D DiffusionPolicy](./robo_manip_baselines/policy/diffusion_policy_3d)** – Diffusion-based policy using 3D point cloud observations
+- 🔹 **[MLP](./robo_manip_baselines/policy/mlp)**: Simple feedforward policy
+- 🔹 **[SARNN](./robo_manip_baselines/policy/sarnn)**: Sequence-aware RNN-based policy
+- 🔹 **[ACT](./robo_manip_baselines/policy/act)**: Transformer-based imitation policy
+- 🔹 **[MT-ACT](./robo_manip_baselines/policy/mt_act)**: Multi-task Transformer-based imitation policy
+- 🔹 **[Diffusion Policy](./robo_manip_baselines/policy/diffusion_policy)**: Diffusion-based behavior cloning policy
+- 🔹 **[3D DiffusionPolicy](./robo_manip_baselines/policy/diffusion_policy_3d)**: Diffusion-based policy using 3D point cloud observations
 
 ---
 
 ## 📦 Data
 
-- 📂 [Dataset List](./doc/dataset_list.md): Pre-collected expert demonstration datasets  
+- 📂 [Dataset List](./doc/dataset_list.md): Pre-collected expert demonstration datasets
 - 🧠 [Learned Parameters](./doc/learned_parameters.md): Trained model checkpoints and configs
 - 📄 [Data Format](./doc/rmb_data_format.md): Description of the custom RMB data format used in RoboManipBaselines
 
@@ -55,16 +66,18 @@ We provide several powerful policy architectures for manipulation tasks:
 Use your own teleop interface to collect expert data.  
 See [Teleop Tools](./robo_manip_baselines/teleop) for more info.
 
+- 🎮 [Multiple SpaceMouse](./doc/use_multiple_spacemouse.md): Setup multiple SpaceMouse for high-degree-of-freedom robots
+
 ---
 
 ## 🌍 Environments
 
 Explore diverse manipulation environments:
 
-- 📚 [Environment Catalog](./doc/environment_catalog.md) – Overview of all task environments  
-- 🔧 [Env Setup](./robo_manip_baselines/envs) – Installation guides per environment
-- ✏️ [How to Add a New Environment](./doc/how_to_add_env.md) – Guide for adding a custom environment
-- ✏️ [MuJoCo Tactile Sensor](./doc/mujoco_tactile_sensor.md) – Guide for using tactile sensors in MuJoCo environments
+- 📚 [Environment Catalog](./doc/environment_catalog.md): Overview of all task environments
+- 🔧 [Env Setup](./robo_manip_baselines/envs): Installation guides per environment
+- ✏️ [How to Add a New Environment](./doc/how_to_add_env.md): Guide for adding a custom environment
+- 🔅️ [MuJoCo Tactile Sensor](./doc/mujoco_tactile_sensor.md): Guide for using tactile sensors in MuJoCo environments
 
 ---
 
@@ -76,8 +89,7 @@ Check out [Misc Scripts](./robo_manip_baselines/misc) for standalone tools and u
 
 ## 📊 Evaluation Results
 
-See benchmarked performance across environments and policies:  
-📈 [Evaluation Results](./doc/evaluation_results.md)
+See [Benchmarked Performance](./doc/evaluation_results.md) across environments and policies.
 
 ---
 

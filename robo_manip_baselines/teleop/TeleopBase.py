@@ -14,6 +14,7 @@ from robo_manip_baselines.common import (
     DataKey,
     DataManager,
     MotionManager,
+    OperationDataMixin,
     PhaseBase,
     PhaseManager,
     convert_depth_image_to_color_image,
@@ -95,6 +96,7 @@ class TeleopPhase(PhaseBase):
             print(
                 f"[{self.op.__class__.__name__}] Finish teleoperation. duration: {self.get_elapsed_duration():.1f} [s]"
             )
+            self.op.episode_duration = self.get_elapsed_duration()
             return True
         else:
             return False
@@ -117,6 +119,9 @@ class EndTeleopPhase(PhaseBase):
         if ((not self.op.args.save_success_only) or (self.op.reward >= 1.0)) and (
             self.op.key == ord("s")
         ):
+            self.op.result["success"].append(bool(self.op.reward >= 1.0))
+            self.op.result["reward"].append(float(self.op.reward))
+            self.op.result["duration"].append(self.op.episode_duration)
             self.op.save_data()
             self.op.reset_flag = True
         elif self.op.key == ord("f"):
@@ -128,8 +133,12 @@ class ReplayPhase(PhaseBase):
     def start(self):
         super().start()
 
+        self.op.init_for_relative_command()
+
         self.op.teleop_time_idx = 0
-        print(f"[{self.op.__class__.__name__}] Start to replay the log motion.")
+        print(
+            f"[{self.op.__class__.__name__}] Start to replay the log motion. Press the 'h' key to stop replay."
+        )
 
     def pre_update(self):
         for replay_key in self.op.args.replay_keys:
@@ -144,9 +153,13 @@ class ReplayPhase(PhaseBase):
         self.op.teleop_time_idx += 1
 
     def check_transition(self):
-        return self.op.teleop_time_idx == len(
+        if self.op.key == ord("h") or self.op.teleop_time_idx == len(
             self.op.replay_data_manager.get_data_seq(DataKey.TIME)
-        )
+        ):
+            self.op.episode_duration = self.get_elapsed_duration()
+            return True
+        else:
+            return False
 
 
 class EndReplayPhase(PhaseBase):
@@ -160,6 +173,9 @@ class EndReplayPhase(PhaseBase):
 
     def post_update(self):
         if self.op.auto_mode or (self.op.key == ord("n")):
+            self.op.result["success"].append(bool(self.op.reward >= 1.0))
+            self.op.result["reward"].append(float(self.op.reward))
+            self.op.result["duration"].append(self.op.episode_duration)
             if self.op.args.save_replay:
                 self.op.save_data()
             self.op.replay_file_idx += 1
@@ -169,7 +185,7 @@ class EndReplayPhase(PhaseBase):
                 self.op.reset_flag = True
 
 
-class TeleopBase(ABC):
+class TeleopBase(OperationDataMixin, ABC):
     MotionManagerClass = MotionManager
     DataManagerClass = DataManager
 
@@ -183,6 +199,8 @@ class TeleopBase(ABC):
         self.setup_env()
         self.demo_name = self.args.demo_name or remove_suffix(self.env.spec.name, "Env")
         self.env.reset(seed=self.args.seed)
+        if self.args.target_task is not None:
+            self.env.unwrapped.target_task = self.args.target_task
 
         # Setup motion manager
         self.motion_manager = self.MotionManagerClass(self.env)
@@ -193,6 +211,7 @@ class TeleopBase(ABC):
         )
         self.data_manager.setup_camera_info()
         self.datetime_now = datetime.datetime.now()
+        self.result = {key: [] for key in ("success", "reward", "duration")}
 
         if self.args.replay_log is not None:
             # Setup data manager for replay
@@ -201,6 +220,7 @@ class TeleopBase(ABC):
 
             # Set log files for replay
             self.replay_filenames = find_rmb_files(self.args.replay_log)
+            self.replay_filenames *= self.args.replay_repeat_count
             self.replay_file_idx = 0
 
         # Setup phase manager
@@ -259,7 +279,10 @@ class TeleopBase(ABC):
             "--demo_name", type=str, default="", help="demonstration name"
         )
         parser.add_argument(
-            "--task_desc", type=str, default="", help="task_description"
+            "--target_task", type=str, default=None, help="target task name"
+        )
+        parser.add_argument(
+            "--task_desc", type=str, default="", help="task description"
         )
 
         parser.add_argument(
@@ -273,6 +296,13 @@ class TeleopBase(ABC):
             "--save_success_only",
             action="store_true",
             help="whether to save data only when the task succeeds",
+        )
+
+        parser.add_argument(
+            "--result_filename",
+            type=str,
+            default=None,
+            help="File path (*.yaml) to save rollout results (default: do not save)",
         )
 
         parser.add_argument(
@@ -320,6 +350,12 @@ class TeleopBase(ABC):
             type=str,
             default=None,
             help="log file path when replaying log motion",
+        )
+        parser.add_argument(
+            "--replay_repeat_count",
+            type=int,
+            default=1,
+            help="number of times to repeat replay per file",
         )
         parser.add_argument(
             "--auto_replay",
@@ -459,6 +495,13 @@ class TeleopBase(ABC):
             if (not self.auto_mode) and (iteration_duration < self.env.unwrapped.dt):
                 time.sleep(self.env.unwrapped.dt - iteration_duration)
 
+        if self.args.result_filename is not None:
+            print(
+                f"[{self.__class__.__name__}] Save the teleoperation results: {self.args.result_filename}"
+            )
+            with open(self.args.result_filename, "w") as result_file:
+                yaml.dump(self.result, result_file)
+
         self.print_statistics()
 
         if self.args.replay_log is None:
@@ -494,17 +537,6 @@ class TeleopBase(ABC):
             )
             world_idx = self.replay_data_manager.get_meta_data("world_idx")
 
-            # Set initial joint position for relative command
-            if not set(self.args.replay_keys).isdisjoint(
-                [DataKey.COMMAND_JOINT_POS_REL, DataKey.COMMAND_EEF_POSE_REL]
-            ):
-                self.motion_manager.set_command_data(
-                    DataKey.COMMAND_JOINT_POS,
-                    self.replay_data_manager.get_single_data(
-                        DataKey.COMMAND_JOINT_POS, 0
-                    ),
-                )
-
         # Reset environment
         self.env.unwrapped.world_random_scale = self.args.world_random_scale
         self.data_manager.setup_env_world(world_idx)
@@ -516,61 +548,33 @@ class TeleopBase(ABC):
         # Reset phase manager
         self.phase_manager.reset()
 
-    def record_data(self):
-        # Add time
-        self.data_manager.append_single_data(
-            DataKey.TIME, self.phase_manager.phase.get_elapsed_duration()
-        )
-
-        # Add reward
-        self.data_manager.append_single_data(DataKey.REWARD, self.reward)
-
-        # Add measured data
-        for key in self.env.unwrapped.measured_keys_to_save:
-            self.data_manager.append_single_data(
-                key, self.motion_manager.get_measured_data(key, self.obs)
-            )
-
-        # Add command data
-        for key in self.env.unwrapped.command_keys_to_save:
-            self.data_manager.append_single_data(
-                key, self.motion_manager.get_command_data(key)
-            )
-
-        # Add relative data
-        for key in (
-            DataKey.MEASURED_JOINT_POS_REL,
+    def init_for_relative_command(self):
+        for key in [
             DataKey.COMMAND_JOINT_POS_REL,
-            DataKey.MEASURED_EEF_POSE_REL,
+            DataKey.COMMAND_GRIPPER_JOINT_POS_REL,
             DataKey.COMMAND_EEF_POSE_REL,
-        ):
-            self.data_manager.append_single_data(
-                key, self.data_manager.calc_rel_data(key)
+        ]:
+            if key not in self.args.replay_keys:
+                continue
+
+            abs_key = DataKey.get_abs_key(key)
+            self.motion_manager.set_command_data(
+                abs_key,
+                self.replay_data_manager.get_single_data(abs_key, 0),
             )
 
-        # Add image
-        for camera_name in self.env.unwrapped.camera_names:
-            self.data_manager.append_single_data(
-                DataKey.get_rgb_image_key(camera_name),
-                self.info["rgb_images"][camera_name],
+    def save_data(self):
+        filename = os.path.normpath(
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "dataset",
+                f"{self.demo_name}_{self.datetime_now:%Y%m%d_%H%M%S}",
+                f"{self.demo_name}_world{self.data_manager.world_idx:0>1}_{self.data_manager.episode_idx:0>3}.{self.args.file_format}",
             )
-            self.data_manager.append_single_data(
-                DataKey.get_depth_image_key(camera_name),
-                self.info["depth_images"][camera_name],
-            )
-        for rgb_tactile_name in self.env.unwrapped.rgb_tactile_names:
-            self.data_manager.append_single_data(
-                DataKey.get_rgb_image_key(rgb_tactile_name),
-                self.info["rgb_images"][rgb_tactile_name],
-            )
-
-        # Add tactile
-        if "intensity_tactile" in self.info:
-            for intensity_tactile_name in self.info["intensity_tactile"]:
-                self.data_manager.append_single_data(
-                    intensity_tactile_name,
-                    self.info["intensity_tactile"][intensity_tactile_name].copy(),
-                )
+        )
+        self.data_manager.save_data(filename)
+        print(f"[{self.__class__.__name__}] Save the data as {filename}")
 
     def draw_image(self):
         phase_image = self.phase_manager.get_phase_image(
@@ -669,20 +673,6 @@ class TeleopBase(ABC):
             ax.set_title(tactile_name)
         plt.draw()
         plt.pause(0.001)
-
-    def save_data(self, filename=None):
-        if filename is None:
-            filename = os.path.normpath(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "..",
-                    "dataset",
-                    f"{self.demo_name}_{self.datetime_now:%Y%m%d_%H%M%S}",
-                    f"{self.demo_name}_world{self.data_manager.world_idx:0>1}_{self.data_manager.episode_idx:0>3}.{self.args.file_format}",
-                )
-            )
-        self.data_manager.save_data(filename)
-        print(f"[{self.__class__.__name__}] Save the data as {filename}")
 
     def print_statistics(self):
         print(f"[{self.__class__.__name__}] Statistics on teleoperation")

@@ -7,6 +7,7 @@ from .data.DataKey import DataKey
 from .data.RmbData import RmbData
 from .data.CachedDataset import CachedDataset
 from .data.EnvDataMixin import EnvDataMixin
+from .data.OperationDataMixin import OperationDataMixin
 
 from .manager.PhaseManager import PhaseManager
 from .manager.MotionManager import MotionManager
@@ -25,6 +26,7 @@ from .utils.MathUtils import (
     get_se3_from_pose,
     get_rel_pose_from_se3,
     get_se3_from_rel_pose,
+    euler_to_rotation_matrix,
 )
 from .utils.VisionUtils import (
     crop_and_resize,
