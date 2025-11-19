@@ -115,5 +115,36 @@ benchmarks = [
   "imageio-ffmpeg",
 ]
 
+mypolicy = [
+  "rospkg",
+  "pexpect",
+  "accelerate",
+  "deepspeed",
+  "termcolor",
+  "tensorboardX",
+  "imageio-ffmpeg",
+  "tianshou==0.4.10",
+  "seaborn",
+  "timm",
+  "huggingface_hub==0.25.2",
+  "transformers==4.46.1",
+  "cffi",
+  "zarr>=2.12.0",
+  "numcodecs",
+  "hydra-core",
+  "einops",
+  "dill",
+  "egl_probe>=1.0.1",
+  "diffusers==0.11.1",
+  "numpy>=1.13.3",
+  "h5py",
+  "psutil",
+  "tqdm",
+  "termcolor",
+  "tensorboard",
+  "tensorboardX",
+]
+
+
 [tool.setuptools.packages.find]
 include = ["robo_manip_baselines", "robo_manip_baselines.*"]
