@@ -42,3 +42,8 @@
 	path = third_party/bict-robotics
 	url = git@github.com:TomohiroMOTODA/bict-robotics.git
 	branch = feature/model-v2
+
+[submodule "third_party/LatentTom"]
+	path = third_party/LatentTom
+	url = git@github.com:TomohiroMOTODA/LatentToM.git
+
