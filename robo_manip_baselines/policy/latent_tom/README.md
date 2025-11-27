@@ -4,6 +4,12 @@
 ## Install
 TBD
 
+> [!NOTE]
+> Upgrade `huggingface_hub>=0.23.2` by the following command.
+> ```console
+> $ pip install huggingface_hub==0.23.2
+> ```
+
 ## Dataset preparation
 Collect demonstration data by [teleoperation](../../teleop).
 
