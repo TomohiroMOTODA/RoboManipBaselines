@@ -31,6 +31,17 @@ class TrainMyPolicy(TrainBase):
         parser.add_argument('--sampler', '-s', default='step', type=str, help="Sampler type: 'epoch' or 'step'")
         parser.add_argument('--accelerate', action='store_true', help="Use Huggingface Accelerate for multi-GPU or distributed training")
         parser.add_argument('--arm', '-a', default=None, type=str, help="Train specific arm only ('left_arm', 'right_arm'), or 'both' for coordinated training")
+        
+        parser.add_argument("--kl_weight", type=int, default=10, help="KL weight")
+        parser.add_argument(
+            "--chunk_size", type=int, default=50, help="action chunking size"
+        )
+        parser.add_argument(
+            "--hidden_dim", type=int, default=512, help="hidden dimension"
+        )
+        parser.add_argument(
+            "--dim_feedforward", type=int, default=3200, help="feedforward dimension"
+        )
 
     def setup_model_meta_info(self):
         super().setup_model_meta_info()

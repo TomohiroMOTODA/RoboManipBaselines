@@ -27,4 +27,3 @@ mkdir -p MujocoAlohaHandover_Dataset50
 unzip MujocoAlohaHandover_Dataset50.zip -d MujocoAlohaHandover_Dataset50
 rm -r MujocoAlohaHandover_Dataset50.zip
 ```
-

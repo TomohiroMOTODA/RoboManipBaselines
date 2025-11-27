@@ -7,7 +7,7 @@ Train a model:
 ```console
 # Go to the top directory of this repository
 $ cd robo_manip_baselines
-$ python ./bin/Train.py MyPolicy --dataset_dir ./dataset/MujocoAlohaHandover --checkpoint_dir ./checkpoint/MyPolicy/test
+$ python ./bin/Train.py MyPolicy --dataset_dir ./dataset/MujocoAlohaHandover_Dataset50 --checkpoint_dir ./checkpoint/MyPolicy/test --camera_names overhead_cam worms_eye_cam wrist_cam_left wrist_cam_right
 ```
 
 > [!NOTE]
