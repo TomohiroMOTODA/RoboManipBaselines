@@ -19,6 +19,8 @@ class RolloutMain:
         "DiffusionPolicy3d",
         "FlowPolicy",
         "ManiFlowPolicy",
+        "LatentTom",
+        "MyPolicy",
     ]
 
     def __init__(self):

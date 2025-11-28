@@ -15,7 +15,7 @@ class TrainMain:
         "FlowPolicy",
         "ManiFlowPolicy",
         "LatentTom",
-        "MyPolicy"
+        "MyPolicy",
     ]
 
     def __init__(self):

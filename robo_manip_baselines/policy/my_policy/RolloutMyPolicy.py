@@ -2,13 +2,14 @@ import os
 import sys
 
 import cv2
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act"))
-from detr.models.detr_vae import DETRVAE
-from policy import ACTPolicy
-
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/bict-robotics/src"))
+import os
+from bict.lib.policy import BictConsensusPolicy
 from robo_manip_baselines.common import RolloutBase, denormalize_data
 
 
@@ -28,9 +29,7 @@ class RolloutMyPolicy(RolloutBase):
         )
 
         # Construct policy
-        DETRVAE.set_state_dim(self.state_dim)
-        DETRVAE.set_action_dim(self.action_dim)
-        self.policy = ACTPolicy(self.model_meta_info["policy"]["args"])
+        self.policy = BictConsensusPolicy(self.model_meta_info["policy"]["args"])
 
         # Register fook to visualize attention images
         def forward_fook(_layer, _input, _output):
@@ -113,16 +112,16 @@ class RolloutMyPolicy(RolloutBase):
         self.plot_action(self.ax[0, len(self.camera_names)])
 
         # Draw attention images
-        attention_shape = (15, 20 * len(self.camera_names))
-        for layer_idx, layer in enumerate(self.policy.model.transformer.encoder.layers):
-            if layer.self_attn.correlation_mat is None:
-                continue
-            self.ax[1, layer_idx].imshow(
-                layer.self_attn.correlation_mat[2:, 1].reshape(attention_shape)
-            )
-            self.ax[1, layer_idx].set_title(
-                f"attention image ({layer_idx})", fontsize=20
-            )
+        # attention_shape = (15, 20 * len(self.camera_names))
+        # for layer_idx, layer in enumerate(self.policy.model.transformer.encoder.layers):
+        #     if layer.self_attn.correlation_mat is None:
+        #         continue
+        #     self.ax[1, layer_idx].imshow(
+        #         layer.self_attn.correlation_mat[2:, 1].reshape(attention_shape)
+        #     )
+        #     self.ax[1, layer_idx].set_title(
+        #         f"attention image ({layer_idx})", fontsize=20
+        #     )
 
         # Finalize plot
         self.canvas.draw()
