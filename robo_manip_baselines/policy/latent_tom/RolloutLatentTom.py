@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 sys.path.append(
-    os.path.join(os.path.dirname(__file__), "../../../third_party/diffusion_policy")
+    os.path.join(os.path.dirname(__file__), "../../../third_party/LatentTom")
 )
 from robo_manip_baselines.common import (
     DataKey,
