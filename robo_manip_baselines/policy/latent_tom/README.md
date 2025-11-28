@@ -22,7 +22,7 @@ Train a model:
 ```console
 # Go to the top directory of this repository
 $ cd robo_manip_baselines
-$ python ./bin/Train.py LatentTOMPolicy --dataset_dir ./dataset/<dataset_name> --checkpoint_dir ./checkpoint/LatentTOMPolicy/<checkpoint_name>
+$ python ./bin/Train.py LatentTom --dataset_dir ./dataset/<dataset_name> --checkpoint_dir ./checkpoint/LatentTom/<checkpoint_name>
 ```
 
 ## Policy rollout
