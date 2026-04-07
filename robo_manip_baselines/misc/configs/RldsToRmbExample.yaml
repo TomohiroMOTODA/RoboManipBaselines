@@ -1,0 +1,30 @@
+step_mappings:
+  measured_joint_pos:
+    path: observation.state
+  command_joint_pos:
+    path: action
+  reward:
+    path: reward
+    optional: true
+  front_rgb_image:
+    path: observation.image_front
+    optional: true
+
+episode_metadata_mappings:
+  task_desc:
+    path: task
+    optional: true
+  env:
+    path: environment_config.env_name
+    optional: true
+  episode_id:
+    path: episode_id
+    optional: true
+
+constant_episode_metadata:
+  demo_name: converted_from_rlds
+
+conversion:
+  fps: 30.0
+  drop_last_step_if_is_last: true
+  skip_invalid_episodes: true
