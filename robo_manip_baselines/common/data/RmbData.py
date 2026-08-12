@@ -142,6 +142,20 @@ class RmbData:
         def dtype(self):
             return np.float32
 
+    def __new__(cls, path, *args, **kwargs):
+        # Transparently return a LeRobot episode reader for virtual episode paths
+        # ('<dataset_dir>@<episode_idx>') so that existing RmbData call sites can
+        # consume LeRobot datasets without modification. Imports are lazy to avoid
+        # a circular import and a hard dependency on the optional lerobot package.
+        if cls is RmbData:
+            from ..utils.FileUtils import parse_lerobot_episode_path
+
+            if parse_lerobot_episode_path(path) is not None:
+                from .LeRobotData import LeRobotEpisodeData
+
+                return LeRobotEpisodeData(path, *args, **kwargs)
+        return super().__new__(cls)
+
     def __init__(self, path, enable_cache=False, mode="r", image_size=None):
         self.path = path
         self.enable_cache = enable_cache
