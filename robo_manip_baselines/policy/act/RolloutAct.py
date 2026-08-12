@@ -4,6 +4,7 @@ import sys
 import cv2
 import matplotlib.pylab as plt
 import numpy as np
+import torch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../third_party/act"))
 from detr.models.detr_vae import DETRVAE
@@ -44,6 +45,24 @@ class RolloutAct(RolloutBase):
 
         # Load checkpoint
         self.load_ckpt()
+
+    def get_images(self):
+        image_size = self.model_meta_info["data"].get("image_size")
+        if image_size is None:
+            return super().get_images()
+
+        images = np.stack(
+            [
+                cv2.resize(self.info["rgb_images"][camera_name], tuple(image_size))
+                for camera_name in self.camera_names
+            ],
+            axis=0,
+        )
+        images = np.moveaxis(images, -1, -3)
+        images = torch.tensor(images, dtype=torch.uint8)
+        images = self.image_transforms(images)[torch.newaxis].to(self.device)
+
+        return images
 
     def setup_plot(self):
         fig_ax = plt.subplots(

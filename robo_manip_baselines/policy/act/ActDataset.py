@@ -18,10 +18,16 @@ class ActDataset(DatasetBase):
         return len(self.filenames)
 
     def __getitem__(self, episode_idx):
+        return self.load_with_retry(self._load_episode, episode_idx)
+
+    def _load_episode(self, episode_idx):
         skip = self.model_meta_info["data"]["skip"]
         chunk_size = self.model_meta_info["data"]["chunk_size"]
+        image_size = self.model_meta_info["data"].get("image_size")
 
-        with RmbData(self.filenames[episode_idx], self.enable_rmb_cache) as rmb_data:
+        with RmbData(
+            self.filenames[episode_idx], self.enable_rmb_cache, image_size=image_size
+        ) as rmb_data:
             episode_len = rmb_data[DataKey.TIME][::skip].shape[0]
             start_time_idx = np.random.choice(episode_len)
 

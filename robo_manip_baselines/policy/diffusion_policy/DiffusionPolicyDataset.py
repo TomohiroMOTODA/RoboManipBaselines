@@ -21,6 +21,9 @@ class DiffusionPolicyDataset(DatasetBase, DpStyleDatasetMixin):
         return len(self.chunk_info_list)
 
     def __getitem__(self, chunk_idx):
+        return self.load_with_retry(self._load_chunk, chunk_idx)
+
+    def _load_chunk(self, chunk_idx):
         skip = self.model_meta_info["data"]["skip"]
         horizon = self.model_meta_info["data"]["horizon"]
         image_size = self.model_meta_info["data"]["image_size"]

@@ -380,7 +380,7 @@ class TrainDiffusionPolicy(TrainBase):
         for epoch in tqdm(range(self.args.num_epochs)):
             # Run train step
             batch_result_list = []
-            for data in self.train_dataloader:
+            for data in tqdm(self.train_dataloader, desc=f"Epoch {epoch:0>3} train", leave=False):
                 loss = self.policy.compute_loss(dict_apply(data, lambda x: x.cuda()))
                 loss.backward()
                 self.optimizer.step()
@@ -403,7 +403,7 @@ class TrainDiffusionPolicy(TrainBase):
             policy.eval()
             with torch.inference_mode():
                 batch_result_list = []
-                for data in self.val_dataloader:
+                for data in tqdm(self.val_dataloader, desc=f"Epoch {epoch:0>3} val", leave=False):
                     loss = policy.compute_loss(dict_apply(data, lambda x: x.cuda()))
                     batch_result_list.append(self.detach_batch_result({"loss": loss}))
                 epoch_summary = self.log_epoch_summary(batch_result_list, "val", epoch)
