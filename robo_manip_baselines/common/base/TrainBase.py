@@ -51,8 +51,9 @@ class TrainBase(ABC):
         parser.add_argument(
             "--dataset_dir",
             type=str,
+            nargs="+",
             required=True,
-            help="dataset directory",
+            help="dataset directory or directories",
         )
         parser.add_argument(
             "--checkpoint_dir",
@@ -173,7 +174,7 @@ class TrainBase(ABC):
         parser.add_argument("--num_epochs", type=int, help="number of epochs")
         parser.add_argument("--lr", type=float, help="learning rate")
         parser.add_argument(
-            "--num_workers", type=int, default=4, help="number of workers in dataloader"
+            "--num_workers", type=int, default=8, help="number of workers in dataloader"
         )
 
         parser.add_argument("--seed", type=int, default=42, help="random seed")
@@ -186,7 +187,12 @@ class TrainBase(ABC):
 
         # Set checkpoint directory if it is not specified
         if self.args.checkpoint_dir is None:
-            dataset_dirname = os.path.basename(os.path.normpath(self.args.dataset_dir))
+            dataset_dirname = "+".join(
+                [
+                    os.path.basename(os.path.normpath(dataset_dir))
+                    for dataset_dir in self.args.dataset_dir
+                ]
+            )
             checkpoint_dirname = "{}_{}_{:%Y%m%d_%H%M%S}".format(
                 dataset_dirname, self.policy_name, datetime.datetime.now()
             )
@@ -205,15 +211,28 @@ class TrainBase(ABC):
         pass
 
     def setup_rmb_files(self):
-        self.all_filenames = find_rmb_files(
-            self.args.dataset_dir, num_files=self.args.num_data
-        )
+        self.all_filenames = []
+        for dataset_dir in self.args.dataset_dir:
+            self.all_filenames.extend(find_rmb_files(dataset_dir))
+        if self.args.num_data is not None:
+            if self.args.num_data > len(self.all_filenames):
+                raise ValueError(
+                    f"[{self.__class__.__name__}] Requested num_data={self.args.num_data} exceeds total available files={len(self.all_filenames)}."
+                )
+            self.all_filenames = sorted(
+                random.sample(self.all_filenames, self.args.num_data)
+            )
         random.shuffle(self.all_filenames)
 
     def setup_model_meta_info(self):
         self.model_meta_info = {
             "data": {
-                "name": os.path.basename(os.path.normpath(self.args.dataset_dir)),
+                "name": "+".join(
+                    [
+                        os.path.basename(os.path.normpath(dataset_dir))
+                        for dataset_dir in self.args.dataset_dir
+                    ]
+                ),
                 "skip": self.args.skip,
             },
             "policy": {"name": self.policy_name},

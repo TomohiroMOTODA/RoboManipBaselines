@@ -95,6 +95,7 @@ class DataKey:
         # COMMAND_EEF_VEL,
         # COMMAND_EEF_WRENCH,
         COMMAND_MOBILE_OMNI_VEL,
+        MEASURED_GRIPPER_JOINT_POS
     ]
 
     @classmethod
