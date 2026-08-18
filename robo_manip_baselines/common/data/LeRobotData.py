@@ -208,7 +208,14 @@ class LeRobotData:
             DataKey.TIME: "observation.source_time",
         }
         if key in aliases:
-            return aliases[key]
+            candidate = aliases[key]
+            if candidate in self.features:
+                return candidate
+            # Datasets not produced by the V2 converter have no recorded RMB
+            # time; LeRobot's own timestamp column (frame_index / fps) always
+            # exists and is sufficient for episode length and time lookups.
+            if key == DataKey.TIME and "timestamp" in self.features:
+                return "timestamp"
         candidate = f"observation.rmb.{key}"
         if candidate in self.features:
             return candidate
@@ -226,12 +233,14 @@ class LeRobotData:
                 )
                 keys.append(DataKey.get_rgb_image_key(camera_name))
         keys.extend(
-            [
+            key
+            for key in (
                 DataKey.MEASURED_JOINT_POS,
                 DataKey.COMMAND_JOINT_POS,
                 DataKey.MEASURED_JOINT_VEL,
                 DataKey.TIME,
-            ]
+            )
+            if self._resolve_key(key) is not None
         )
         for episode in self.asset_manifest.get("episodes", {}).values():
             for depth in episode.get("depth", []):
@@ -303,7 +312,7 @@ class LeRobotData:
         dtype = np.dtype(schema["dtype"] if schema else feature["dtype"])
         if schema is not None:
             shape = tuple(schema["shape"])
-        elif key in ("observation.source_time", "reward"):
+        elif key in ("observation.source_time", "timestamp", "reward"):
             shape = ()
         else:
             shape = tuple(feature["shape"])
