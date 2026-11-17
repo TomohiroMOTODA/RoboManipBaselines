@@ -33,6 +33,8 @@ https://github.com/user-attachments/assets/1ad3dcbe-bb4c-4711-96c3-5e196e9d067b
 Start collecting data in the **MuJoCo** simulation, train your model, and rollout the ACT policy in just a few steps!  
 📄 See the [Quick Start Guide](./doc/quick_start.md).
 
+[Shared rollout APIs and optional action chunk scheduler (B1, Japanese)](./doc/rollout_common_manual.md).
+
 ---
 
 ## ⚙️ Installation
