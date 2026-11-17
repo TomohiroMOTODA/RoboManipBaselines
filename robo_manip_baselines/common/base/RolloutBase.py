@@ -18,6 +18,7 @@ from torchvision.transforms import v2
 
 from ..data.DataKey import DataKey
 from ..data.OperationDataMixin import OperationDataMixin
+from ..manager.ActionChunkScheduler import ActionChunkScheduler
 from ..manager.DataManager import DataManager
 from ..manager.MotionManager import MotionManager
 from ..manager.PhaseManager import PhaseManager
@@ -57,11 +58,10 @@ class RolloutPhase(PhaseBase):
         )
 
     def pre_update(self):
-        if self.op.rollout_time_idx % self.op.args.skip == 0:
-            inference_start_time = time.time()
-            with torch.inference_mode():
-                self.op.infer_policy()
-            self.op.inference_duration_list.append(time.time() - inference_start_time)
+        if self.op.args.use_action_chunk_scheduler:
+            self.op.update_policy_action_from_scheduler()
+        elif self.op.rollout_time_idx % self.op.args.skip == 0:
+            self.op.infer_policy_with_timing()
 
         self.op.set_command_data()
 
@@ -248,6 +248,42 @@ class RolloutBase(OperationDataMixin, ABC):
             type=int,
             help="step interval to draw the plot",
         )
+        parser.add_argument(
+            "--use_action_chunk_scheduler",
+            action="store_true",
+            help=(
+                "use the common action chunk scheduler instead of the legacy "
+                "skip-gated policy action path"
+            ),
+        )
+        parser.add_argument(
+            "--action_chunk_refill_threshold",
+            type=int,
+            default=0,
+            help=(
+                "request a new action chunk when the scheduler queue depth is at "
+                "or below this value"
+            ),
+        )
+        parser.add_argument(
+            "--action_chunk_blend_steps",
+            type=int,
+            default=0,
+            help="number of leading actions blended at chunk boundaries",
+        )
+        parser.add_argument(
+            "--action_chunk_max_queue_size",
+            type=int,
+            default=0,
+            help="maximum queued actions; 0 disables queue truncation",
+        )
+        parser.add_argument(
+            "--action_chunk_underrun_policy",
+            type=str,
+            default="hold",
+            choices=("hold", "error"),
+            help="scheduler behavior when no queued action is available",
+        )
 
         parser.add_argument("--seed", type=int, default=-1, help="random seed")
 
@@ -412,9 +448,17 @@ class RolloutBase(OperationDataMixin, ABC):
 
     def setup_variables(self):
         self.image_transforms = v2.Compose([v2.ToDtype(torch.float32, scale=True)])
+        self.action_chunk_scheduler = ActionChunkScheduler(
+            action_dim=self.action_dim,
+            refill_threshold=self.args.action_chunk_refill_threshold,
+            blend_steps=self.args.action_chunk_blend_steps,
+            max_queue_size=self.args.action_chunk_max_queue_size,
+            underrun_policy=self.args.action_chunk_underrun_policy,
+        )
 
     def reset_variables(self):
         self.policy_action_list = np.empty((0, self.action_dim))
+        self.action_chunk_scheduler.reset()
 
     def get_pre_motion_phases(self):
         return []
@@ -486,22 +530,14 @@ class RolloutBase(OperationDataMixin, ABC):
                 yaml.dump(self.result, result_file)
 
         self.print_statistics()
+        self.print_action_chunk_scheduler_statistics()
 
         # self.env.close()
 
     def reset(self):
         # Reset plot
         if not self.args.no_plot:
-            for _ax in np.ravel(self.ax):
-                _ax.cla()
-                _ax.axis("off")
-
-            self.canvas = FigureCanvasAgg(self.fig)
-            self.canvas.draw()
-            cv2.imshow(
-                self.policy_name,
-                cv2.cvtColor(np.asarray(self.canvas.buffer_rgba()), cv2.COLOR_RGB2BGR),
-            )
+            self.reset_plot()
 
         # Reset motion manager
         self.motion_manager.reset()
@@ -524,6 +560,8 @@ class RolloutBase(OperationDataMixin, ABC):
         self.phase_manager.reset()
 
         # Reset variables
+        print(f"[{self.__class__.__name__}] Reset variables.")
+        self.action_chunk_scheduler.reset()
         self.reset_variables()
 
     @abstractmethod
@@ -569,7 +607,11 @@ class RolloutBase(OperationDataMixin, ABC):
         if action_keys is None:
             action_keys = self.action_keys
 
-        is_skip = self.rollout_time_idx % self.args.skip != 0
+        is_skip = (
+            False
+            if self.args.use_action_chunk_scheduler
+            else self.rollout_time_idx % self.args.skip != 0
+        )
         action_idx = 0
         for key in action_keys:
             action_dim = DataKey.get_dim_for_policy(key, self.env)
@@ -656,3 +698,76 @@ class RolloutBase(OperationDataMixin, ABC):
         for buffer in self.policy.buffers():
             buffer_size += buffer.nelement() * buffer.element_size()
         return param_size + buffer_size
+
+
+    def reset_plot(self):
+        for _ax in np.ravel(self.ax):
+            _ax.cla()
+            _ax.axis("off")
+
+        self.canvas = FigureCanvasAgg(self.fig)
+        self.canvas.draw()
+        cv2.imshow(
+            self.policy_name,
+            cv2.cvtColor(np.asarray(self.canvas.buffer_rgba()), cv2.COLOR_RGB2BGR),
+        )
+
+    def infer_policy_with_timing(self):
+        inference_start_time = time.time()
+        with torch.inference_mode():
+            self.infer_policy()
+        inference_duration = time.time() - inference_start_time
+        self.inference_duration_list.append(inference_duration)
+        return inference_duration
+
+    def update_policy_action_from_scheduler(self):
+        previous_action_count = self.get_policy_action_list_length()
+        if self.action_chunk_scheduler.needs_refill():
+            obs_timestamp = time.perf_counter()
+            inference_start_time = time.perf_counter()
+            self.infer_policy_with_timing()
+            inference_end_time = time.perf_counter()
+            self.action_chunk_scheduler.push(
+                self.get_policy_action_chunk_for_scheduler(),
+                obs_timestamp=obs_timestamp,
+                inference_start_time=inference_start_time,
+                inference_end_time=inference_end_time,
+            )
+
+        self.policy_action = self.action_chunk_scheduler.next_action()
+        self.record_scheduler_policy_action(
+            self.policy_action,
+            previous_action_count,
+        )
+
+    def get_policy_action_chunk_for_scheduler(self):
+        return np.asarray(self.policy_action, dtype=np.float64)
+
+    def get_policy_action_list_length(self):
+        if self.policy_action_list is None:
+            return 0
+        return len(self.policy_action_list)
+
+    def record_scheduler_policy_action(self, action, previous_action_count):
+        action = np.asarray(action, dtype=np.float64)
+        if self.policy_action_list is None:
+            self.policy_action_list = action[np.newaxis]
+        elif len(self.policy_action_list) > previous_action_count:
+            self.policy_action_list[-1] = action
+        else:
+            self.policy_action_list = np.concatenate(
+                [self.policy_action_list, action[np.newaxis]]
+            )
+
+    def print_action_chunk_scheduler_statistics(self):
+        if not getattr(self.args, "use_action_chunk_scheduler", False):
+            return
+
+        stats = self.action_chunk_scheduler.get_statistics()
+        print(f"[{self.__class__.__name__}] Action chunk scheduler statistics")
+        for key in sorted(stats):
+            value = stats[key]
+            if isinstance(value, float):
+                print(f"  - {key} | {value:.6g}")
+            else:
+                print(f"  - {key} | {value}")
