@@ -1,6 +1,5 @@
-# B1：共通rollout APIとaction chunk scheduler
+# 共通rollout APIとaction chunk scheduler
 
-更新日：2026-11-17。対象実装は `8354af2`（このリポジトリのshiba）。
 既存のインストール環境で使う追加機能の説明です。環境構築は [インストール手順](install.md) を参照してください。
 
 ## 通常の運用
@@ -9,8 +8,8 @@
 `--skip` ごとに推論する経路を維持します。ACT・GR00T・OpenPiの現在の
 ALOHA運用では、`--use_action_chunk_scheduler` を追加しません。
 
-B1はモデルや機体設定を提供しません。ALOHA側の共通変換は
-[bridgeのC1マニュアル](https://github.com/TomohiroMOTODA/robomanip_aloha_bridge/blob/shiba/doc/shared_alignment_manual.md)
+モデルや機体設定は別途用意します。ALOHA側の共通変換は
+[bridgeの共通変換マニュアル](https://github.com/TomohiroMOTODA/robomanip_aloha_bridge/blob/shiba/doc/shared_alignment_manual.md)
 を参照してください。モデルごとのcheckpoint・入力順序・周期は別途一致させます。
 
 ## schedulerを試す場合
@@ -71,10 +70,8 @@ np.testing.assert_array_equal(queue.next_action(), [3., 4.])  # hold
 assert queue.get_statistics()['underrun_count'] == 1
 queue.reset()
 assert queue.queue_depth == 0 and queue.last_action is None
-print('B1 queue check: OK')
+print('Queue check: OK')
 PY
 ```
 
-公開前の検証では、master＋B1だけの分離コピーで共通API互換性3件と一時キュー動作確認4件が成功しました。
-共通APIテストはbridge側のレビュー対象資料を使用したもので、B1コミットには同梱していません。
-このマニュアルの追加ではロボット操作・ビルドを行っていません。
+共通APIの回帰テストは [bridgeのモデル横断テスト手順](https://github.com/TomohiroMOTODA/robomanip_aloha_bridge/blob/shiba/doc/rollout_cross_model_tests.md) を参照してください。
