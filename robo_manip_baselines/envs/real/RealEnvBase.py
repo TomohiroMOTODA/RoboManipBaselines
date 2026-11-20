@@ -9,7 +9,6 @@ from queue import Queue
 import cv2
 import gymnasium as gym
 import numpy as np
-from gello.cameras.realsense_camera import RealSenseCamera, get_device_ids
 
 from robo_manip_baselines.common import ArmConfig, DataKey, EnvDataMixin
 
@@ -37,6 +36,8 @@ class RealEnvBase(EnvDataMixin, gym.Env, ABC):
     def setup_realsense(self, camera_ids):
         if camera_ids is None:
             return
+
+        from gello.cameras.realsense_camera import RealSenseCamera, get_device_ids
 
         detected_camera_ids = get_device_ids()
         for camera_name, camera_id in camera_ids.items():
@@ -243,7 +244,7 @@ class RealEnvBase(EnvDataMixin, gym.Env, ABC):
     def overwrite_command_for_safety(self, action, duration, joint_vel_limit_scale):
         arm_joint_idxes = np.concatenate(
             [
-                body_config.arm_joint_idxes
+                body_config.arm_action_idxes
                 for body_config in self.body_config_list
                 if isinstance(body_config, ArmConfig)
             ]

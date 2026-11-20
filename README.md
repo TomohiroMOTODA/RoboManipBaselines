@@ -33,6 +33,8 @@ https://github.com/user-attachments/assets/1ad3dcbe-bb4c-4711-96c3-5e196e9d067b
 Start collecting data in the **MuJoCo** simulation, train your model, and rollout the ACT policy in just a few steps!  
 📄 See the [Quick Start Guide](./doc/quick_start.md).
 
+[Shared rollout APIs and optional action chunk scheduler (Japanese)](./doc/rollout_common_manual.md).
+
 ---
 
 ## ⚙️ Installation
@@ -115,7 +117,8 @@ Please check individual files or directories (especially `third_party` and `asse
 
 ## 📖 Citation
 
-If you use RoboManipBaselines in your work, please cite [our paper](https://arxiv.org/abs/2509.17057):
+If you use RoboManipBaselines in your work, please cite our paper:  
+[arXiv](https://arxiv.org/abs/2509.17057) | [Hugging Face](https://huggingface.co/papers/2509.17057):
 
 ```bibtex
 @article{RoboManipBaselines_Murooka_2025,
