@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import torch
 from torchvision.transforms import v2
@@ -22,6 +24,33 @@ class DatasetBase(torch.utils.data.Dataset):
         self.setup_image_transforms()
 
         self.setup_variables()
+
+    def load_with_retry(self, load_func, index, num_attempts=6):
+        """Retry transient data-loading failures (e.g. video decode errors on a
+        shared filesystem). The first retries reuse the same index; later ones
+        skip it and load a random other sample instead."""
+        for attempt in range(num_attempts):
+            try:
+                return load_func(index)
+            except Exception as e:
+                print(
+                    f"[{self.__class__.__name__}] Failed to load sample {index} "
+                    f"(attempt {attempt + 1}/{num_attempts}): {e}",
+                    flush=True,
+                )
+                if attempt == num_attempts - 1:
+                    raise
+                try:
+                    # A failed read leaves the cached decoder (and its open file
+                    # handle) in a broken state; drop it so the retry reopens the file
+                    from lerobot.datasets.video_utils import _default_decoder_cache
+
+                    _default_decoder_cache.clear()
+                except Exception:
+                    pass
+                time.sleep(1.0)
+                if attempt >= 2:
+                    index = int(np.random.randint(len(self)))
 
     def setup_image_transforms(self):
         """
