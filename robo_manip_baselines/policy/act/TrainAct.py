@@ -35,11 +35,26 @@ class TrainAct(TrainBase):
         parser.add_argument(
             "--dim_feedforward", type=int, default=3200, help="feedforward dimension"
         )
+        parser.add_argument(
+            "--backbone",
+            type=str,
+            default="resnet18",
+            choices=["resnet18", "resnet34", "resnet50"],
+            help="vision backbone",
+        )
+        parser.add_argument(
+            "--image_size",
+            type=int,
+            nargs=2,
+            default=None,
+            help="Image size (width, height) to be resized before input. By default, the original size is used.",
+        )
 
     def setup_model_meta_info(self):
         super().setup_model_meta_info()
 
         self.model_meta_info["data"]["chunk_size"] = self.args.chunk_size
+        self.model_meta_info["data"]["image_size"] = self.args.image_size
 
     def setup_policy(self):
         # Set policy args
@@ -50,7 +65,7 @@ class TrainAct(TrainBase):
             "hidden_dim": self.args.hidden_dim,
             "dim_feedforward": self.args.dim_feedforward,
             "lr_backbone": 1e-5,
-            "backbone": "resnet18",
+            "backbone": self.args.backbone,
             "enc_layers": 4,
             "dec_layers": 7,
             "nheads": 8,
@@ -75,7 +90,7 @@ class TrainAct(TrainBase):
             # Run train step
             self.policy.train()
             batch_result_list = []
-            for data in self.train_dataloader:
+            for data in tqdm(self.train_dataloader, desc=f"Epoch {epoch:0>3} train", leave=False):
                 self.optimizer.zero_grad()
                 batch_result = self.policy(*[d.cuda() for d in data])
                 loss = batch_result["loss"]
@@ -88,7 +103,7 @@ class TrainAct(TrainBase):
             with torch.inference_mode():
                 self.policy.eval()
                 batch_result_list = []
-                for data in self.val_dataloader:
+                for data in tqdm(self.val_dataloader, desc=f"Epoch {epoch:0>3} val", leave=False):
                     batch_result = self.policy(*[d.cuda() for d in data])
                     batch_result_list.append(self.detach_batch_result(batch_result))
                 epoch_summary = self.log_epoch_summary(batch_result_list, "val", epoch)

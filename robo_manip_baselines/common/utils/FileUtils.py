@@ -1,10 +1,38 @@
 import glob
+import json
 import os
 import random
 
 
+def is_lerobot_dataset_dir(path):
+    """Check if the path is a local LeRobot dataset directory."""
+    return os.path.isfile(os.path.join(path, "meta", "info.json"))
+
+
+def parse_lerobot_episode_path(path):
+    """Parse a virtual episode path '<dataset_dir>@<episode_idx>' of a LeRobot dataset.
+
+    Returns (dataset_dir, episode_idx) if the path matches, otherwise None.
+    """
+    if not isinstance(path, str) or "@" not in path:
+        return None
+    dataset_dir, _, episode_idx_str = path.rpartition("@")
+    if not episode_idx_str.isdigit() or not is_lerobot_dataset_dir(dataset_dir):
+        return None
+    return dataset_dir, int(episode_idx_str)
+
+
 def find_rmb_files(base_path, num_files=None):
-    if base_path.rstrip("/").endswith((".rmb", ".hdf5")):
+    if parse_lerobot_episode_path(base_path) is not None:
+        rmb_path_list = [base_path]
+    elif os.path.isdir(base_path) and is_lerobot_dataset_dir(base_path):
+        with open(os.path.join(base_path, "meta", "info.json")) as f:
+            total_episodes = json.load(f)["total_episodes"]
+        rmb_path_list = [
+            f"{base_path.rstrip('/')}@{episode_idx}"
+            for episode_idx in range(total_episodes)
+        ]
+    elif base_path.rstrip("/").endswith((".rmb", ".hdf5")):
         rmb_path_list = [base_path]
     elif os.path.isdir(base_path):
         rmb_path_list = sorted(
